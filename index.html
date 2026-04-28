@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Endoscopy Team Style</title>
+    <!-- Importing a clean, modern font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Importing FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Modern soft gradient background */
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            color: #2d3748;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        #app-container {
+            background: white;
+            max-width: 600px;
+            width: 100%;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        h1, h2 { color: #1a365d; text-align: center; font-weight: 700; }
+        
+        /* The Visual Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: #edf2f7;
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #3182ce;
+            width: 0%;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .progress-text { color: #718096; font-size: 13px; text-align: center; margin-bottom: 25px; font-weight: 600; }
+
+        /* Back Button */
+        .back-btn {
+            background: none;
+            border: none;
+            color: #718096;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 5px 10px;
+            margin-left: -10px;
+            transition: color 0.2s;
+            display: none;
+        }
+        .back-btn:hover { color: #2b6cb0; }
+
+        /* Fancy Buttons */
+        .btn {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            padding: 16px;
+            width: 100%;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(49, 130, 206, 0.2);
+        }
+        .btn:hover { background-color: #2b6cb0; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(49, 130, 206, 0.3); }
+        .btn:active { transform: translateY(1px); box-shadow: 0 2px 4px rgba(49, 130, 206, 0.2); }
+        
+        .option-btn {
+            background-color: #f7fafc;
+            color: #2d3748;
+            border: 2px solid #e2e8f0;
+            text-align: left;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            font-size: 15px;
+            font-weight: 400;
+            box-shadow: none;
+        }
+        .option-btn:hover { 
+            border-color: #3182ce; 
+            background-color: #ebf8ff; 
+            color: #2b6cb0;
+        }
+
+        #question-screen, #result-screen { display: none; }
+        
+        /* Smooth Fade & Slide Animations */
+        .animate-fade-in {
+            animation: slideUpFade 0.4s ease forwards;
+        }
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Styling the Result Sections and Icons */
+        .result-header-container { text-align: center; margin-bottom: 30px; }
+        .type-icon { font-size: 80px; color: #3182ce; margin-bottom: 20px; text-shadow: 0 4px 10px rgba(49,130,206,0.1); }
+
+        .profile-section { margin-top: 25px; background: #f7fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #3182ce; }
+        .profile-title { color: #2b6cb0; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; font-size: 13px; letter-spacing: 1px;}
+        .highlight-text { color: #e53e3e; }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <!-- START SCREEN -->
+    <div id="start-screen" class="animate-fade-in">
+        <h1>Endoscopy Team Style</h1>
+        <p style="text-align:center; font-size: 16px; line-height: 1.6; color: #4a5568; margin-bottom: 30px;">
+            Discover your unique nursing style in the unit. Choose the option that best describes your natural instinct during a busy shift. Don't overthink it—go with your gut!
+        </p>
+        <button class="btn" onclick="startQuiz()">Start the Quiz</button>
+    </div>
+
+    <!-- QUESTION SCREEN -->
+    <div id="question-screen">
+        <div class="progress-container">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <button id="back-btn" class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Back</button>
+            <div class="progress-text" id="progress-text" style="margin-bottom: 0;">Question 1 of 30</div>
+            <div style="width: 60px;"></div> <!-- Spacer to keep progress centered -->
+        </div>
+        
+        <div id="question-animator">
+            <h2 id="question-text" style="font-size: 19px; margin-bottom: 30px; text-align: left; line-height: 1.4;"></h2>
+            <button class="btn option-btn" id="option-a" onclick="selectAnswer(0)"></button>
+            <button class="btn option-btn" id="option-b" onclick="selectAnswer(1)"></button>
+        </div>
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div id="result-screen">
+        <div class="animate-fade-in">
+            <div class="result-header-container">
+                <!-- ICON HERE -->
+                <i id="type-icon" class="type-icon fas"></i>
+                <h2>Your Result: <span id="type-letters" style="color: #3182ce;"></span></h2>
+                <h3 id="type-title" style="text-align: center; color: #4a5568; margin-top: 5px;"></h3>
+            </div>
+            
+            <div class="profile-section">
+                <div class="profile-title">Your Superpower</div>
+                <p id="type-superpower" style="line-height: 1.6; margin: 0;"></p>
+            </div>
+            
+            <div class="profile-section" style="border-left-color: #e53e3e;">
+                <div class="profile-title highlight-text">Your Blind Spot</div>
+                <p id="type-blindspot" style="line-height: 1.6; margin: 0;"></p>
+            </div>
+            
+            <div class="profile-section" style="border-left-color: #38a169;">
+                <div class="profile-title" style="color: #38a169;">Management Tip</div>
+                <p id="type-management" style="line-height: 1.6; margin: 0;"></p>
+            </div>
+
+            <button class="btn" onclick="location.reload()" style="margin-top: 30px;">Take Quiz Again</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- THE 30 QUESTIONS ---
+    const questions = [ { text: "1. The Schedule Crisis: An urgent inpatient GI bleed is added, blowing up the afternoon schedule. You are now running 45 minutes behind.", options: [ { text: "I immediately start recalculating the times, rearranging the list, and communicating the new strict plan.", value: "J" }, { text: "I just roll with it. We will take it one patient at a time and figure out the flow as we go.", value: "P" } ] }, { text: "2. The Anxious Patient: A patient in admissions is terrified of the colonoscopy prep and the procedure.", options: [ { text: "I focus on explaining the science of sedation and the exact steps so they understand they are safe.", value: "T" }, { text: "I sit down, validate their feelings, and focus on making them feel emotionally supported and heard.", value: "F" } ] }, { text: "3. The Breakroom Battery: You just survived a brutal morning list of complex ERCPs. It's break time.", options: [ { text: "I want to sit quietly, completely decompressing in silence.", value: "I" }, { text: "I want to sit with my colleagues, vent about the morning, and laugh off the stress together.", value: "E" } ] }, { text: "4. The Equipment Check: You are doing the morning checks on the stack and the scope processors.", options: [ { text: "I go strictly by the checklist, ensuring every dial and button is exactly as it should be.", value: "S" }, { text: "I do the check, but I'm also thinking about whether we need a better layout for the room.", value: "N" } ] }, { text: "5. The Chatty Room: You are assisting a doctor who loves to talk non-stop and play loud music.", options: [ { text: "I jump right into the conversation! It makes the time fly and keeps the energy up.", value: "E" }, { text: "I am polite, but I prefer to focus quietly on my tasks. The constant noise is a bit draining.", value: "I" } ] }, { text: "6. Charting and Documentation: How do you handle your nursing procedure notes?", options: [ { text: "I chart immediately after each case; I hate leaving things pending.", value: "J" }, { text: "I jot down quick notes and prefer to do a bulk charting session when there is a lull.", value: "P" } ] }, { text: "7. Coaching a Colleague: A newer tech keeps making the same minor mistake during scope setup.", options: [ { text: "I correct them directly and clearly on the spot to ensure safety and efficiency.", value: "T" }, { text: "I pull them aside later to gently coach them so they don't feel embarrassed.", value: "F" } ] }, { text: "8. Protocol Updates: A new sedation protocol is introduced for the unit.", options: [ { text: "I read the exact steps, dosages, and contraindications. I want to know exactly what to do.", value: "S" }, { text: "I try to understand the theory behind why the protocol changed and the broader picture.", value: "N" } ] }, { text: "9. The Policy Change: Management announces a change to the weekend on-call rotation.", options: [ { text: "I analyze if the new system makes logical sense and is mathematically fairer for everyone.", value: "T" }, { text: "I immediately worry about how this will affect the morale and work-life balance of the team.", value: "F" } ] }, { text: "10. Supply Room Chaos: The biopsy forceps and snares are stocked in the wrong bins again.", options: [ { text: "I quickly reorganize the bins right now so I can find exactly what I need for my next case.", value: "S" }, { text: "I start brainstorming a completely new labeling system to prevent this from ever happening again.", value: "N" } ] }, { text: "11. The Post-Sedation Ward: You are assigned to recovery, full of awake, stable patients.", options: [ { text: "I naturally enjoy chatting with them, making small talk, and hearing their stories.", value: "E" }, { text: "I keep interactions polite, but prefer when the bay is quiet so I can focus on monitoring.", value: "I" } ] }, { text: "12. The Weird Lesion: The doctor finds a very unusual, complex polyp and pauses to examine it.", options: [ { text: "I note the physical characteristics (size, shape) to ensure our documentation is accurate.", value: "S" }, { text: "I start wondering about the underlying cause or what the pathology report might find.", value: "N" } ] }, { text: "13. The Grumpy Consultant: The endoscopist is frustrated because a case is difficult and snaps.", options: [ { text: "I brush it off. They are stressed, it isn't personal, and my job is just to assist.", value: "T" }, { text: "It immediately affects the vibe. I feel the tension and might try to smooth things over.", value: "F" } ] }, { text: "14. The Cancelled List: Your last three patients cancelled. You suddenly have two free hours.", options: [ { text: "I immediately start a mental list of pending tasks to accomplish.", value: "J" }, { text: "I enjoy the unexpected downtime and just see what needs doing as the afternoon unfolds.", value: "P" } ] }, { text: "15. The New Student: A new nursing student is shadowing you for your entire shift.", options: [ { text: "I enjoy it! I talk them through every single step out loud, keeping a running dialogue.", value: "E" }, { text: "I prefer to demonstrate quietly and let them ask questions between cases. Talking constantly is exhausting.", value: "I" } ] }, { text: "16. Holiday Scheduling: Two nurses want the same week off, but the unit can only spare one.", options: [ { text: "We should look at the objective data: who asked first, or who has the most accrued PTO.", value: "T" }, { text: "We should consider the human context: perhaps one hasn't seen their kids in a while.", value: "F" } ] }, { text: "17. The In-Service Training: A rep is demonstrating a brand-new clipping device.", options: [ { text: "I want to physically hold the handle, feel the mechanism, and practice deploying it.", value: "S" }, { text: "I want to ask about the design changes and envision which scenarios this will be most useful for.", value: "N" } ] }, { text: "18. The Room Setup: You are getting your procedure room ready first thing in the morning.", options: [ { text: "I set up my trolley and my stack exactly the same way every single time.", value: "J" }, { text: "I get the equipment out, but I don't mind if the layout changes slightly depending on the doctor.", value: "P" } ] }, { text: "19. Floating to a New Area: You are unexpectedly floated to pre-assessment for the day.", options: [ { text: "I immediately look for the standard checklist so I know exactly what I am required to ask.", value: "S" }, { text: "I get the general gist of what is needed and adapt my questions conversationally as I go.", value: "N" } ] }, { text: "20. The Handover: You are giving the end-of-shift handover.", options: [ { text: "I like giving verbal handovers face-to-face and discussing the patients dynamically.", value: "E" }, { text: "I prefer making sure the written sheet is perfectly detailed so they can just read it.", value: "I" } ] }, { text: "21. The Late Add-On: It is 4:45 PM. The doctor asks to squeeze in one more scope.", options: [ { text: "I find it frustrating. It disrupts the planned workflow and delays the cleaning process.", value: "J" }, { text: "I roll with it. It's just part of the job in healthcare, and we will adapt.", value: "P" } ] }, { text: "22. The Messy Prep Room: A colleague keeps leaving the prep area disorganized.", options: [ { text: "I address the workflow issue directly: 'Please clean up so it doesn't delay the next case.'", value: "T" }, { text: "I approach with concern: 'You've been leaving the room in a rush—is everything okay?'", value: "F" } ] }, { text: "23. The New AER: The unit just installed a brand-new, high-tech scope washing machine.", options: [ { text: "I learn the exact sequence of buttons and master the practical steps to run it.", value: "S" }, { text: "I think about how this faster machine might change the department's overall turnover efficiency.", value: "N" } ] }, { text: "24. The Unit Meeting: Management asks for feedback on a new patient triage system.", options: [ { text: "I readily speak up, share my thoughts out loud, and brainstorm with the group.", value: "E" }, { text: "I prefer to listen, process internally, and perhaps email my thoughts after the meeting.", value: "I" } ] }, { text: "25. The Inventory Shortage: You are out of your preferred injection needles halfway through a list.", options: [ { text: "I alert the charge nurse and procurement to fix the supply chain issue for tomorrow.", value: "J" }, { text: "I just grab an alternative brand of needle and keep the list moving without a sweat.", value: "P" } ] }, { text: "26. The Fasting Patient: A patient in the waiting room is being very demanding and short-tempered.", options: [ { text: "I stay firm, establish boundaries, and focus on efficiently getting them through safety checks.", value: "T" }, { text: "I try to de-escalate by realizing they are likely acting out from fear or fasting hunger.", value: "F" } ] }, { text: "27. The Emergency Bleed: A patient crashes with a massive upper GI bleed.", options: [ { text: "I lock in on my specific immediate role—drawing up adrenaline and executing tasks with intense focus.", value: "S" }, { text: "I start anticipating what the doctor will need three steps from now and mentally prepare.", value: "N" } ] }, { text: "28. The Trainee Welcome: Three new graduate nurses join the unit.", options: [ { text: "I go out of my way to introduce myself and loudly welcome them to the unit family.", value: "E" }, { text: "I give a warm smile and let them settle in, preferring to get to know them one-on-one later.", value: "I" } ] }, { text: "29. The Lunch Break Shuffle: You are asked to swap your lunch because a case is running long.", options: [ { text: "I'll do it, but it throws me off. I like sticking to the agreed schedule.", value: "J" }, { text: "No problem at all! I'm pretty flexible and don't mind shifting my breaks around.", value: "P" } ] }, { text: "30. Department Morale: You are asked for ideas on how to improve unit morale.", options: [ { text: "I advocate for practical fixes: clearer roles, better equipment, or adjusting the schedule.", value: "T" }, { text: "I suggest organizing a unit breakfast or a social outing so the team can bond.", value: "F" } ] } ];
+
+    // --- THE 16 PROFILES ---
+    const profiles = {
+        "ISTJ": { icon: "fa-clipboard-check", title: "The Protocol Enforcer (Sentinel)", super: "Unbreakable focus. You know the scope-washing manual by heart, your trollies are set up with mathematical precision, and you never miss an expiration date.", blind: "You can become visibly frustrated when doctors deviate from standard protocols or when the schedule changes abruptly.", manage: "You handle complex, high-risk cases that require strict adherence to safety checks flawlessly." },
+        "ESTJ": { icon: "fa-users-gear", title: "The Traffic Controller (Sentinel)", super: "Directing the floor. You are incredible at managing room turnover efficiency, pushing the list forward, and ensuring everyone takes their breaks on time.", blind: "You value efficiency so highly that you can sometimes come across as blunt or impatient with newer, slower staff members.", manage: "You are an excellent flow coordinator, but remember to soften your delivery with sensitive colleagues." },
+        "ISFJ": { icon: "fa-shield-heart", title: "The Backbone (Sentinel)", super: "The 'Mother Hen' of the unit. You naturally care about your team's well-being and ensure the unit runs like a well-oiled machine without cutting corners.", blind: "You absorb the emotional temperature of the room and can face burnout from over-helping or jumping in to do tasks instead of delegating.", manage: "Protect your energy. Practice delegating tasks when chaos hits so you aren't carrying the unit on your shoulders." },
+        "ESFJ": { icon: "fa-hands-holding-heart", title: "The Unit Cheerleader (Sentinel)", super: "Morale and bedside manner. You remember every patient's name, every colleague's birthday, and you create a warm, welcoming environment.", blind: "You take criticism very personally and can exhaust yourself trying to make sure everyone is happy all the time.", manage: "You are the best at handling anxious patients. Recognize the massive value of the 'invisible' emotional labor you do." },
+        "ISTP": { icon: "fa-screwdriver-wrench", title: "The Tech Whisperer (Explorer)", super: "Troubleshooting. If the stack monitor goes black, the water pump jams, or a complex clipping device misfires, you silently fix it on the fly.", blind: "You strongly dislike routine paperwork and endless charting, often leaving it to the absolute last minute.", manage: "Your equipment mastery is unmatched. You thrive when given the autonomy to solve physical problems in the room." },
+        "ISFP": { icon: "fa-user-check", title: "The Gentle Anchor (Explorer)", super: "Quiet observation. You are deeply attuned to the patient's physical comfort during an awake procedure, noticing a wince before monitors alarm.", blind: "You avoid conflict at all costs and will rarely speak up if you are feeling overwhelmed by a demanding doctor.", manage: "Your silent observations are vital because you see details others miss. Remember to advocate for yourself!" },
+        "ESTP": { icon: "fa-bolt", title: "The Adrenaline Junkie (Explorer)", super: "Crisis response. You absolutely thrive when the alarms go off. Whether it's a massive GI bleed or a crashed airway, you act fast and never panic.", blind: "You get bored easily. Putting you on a routine, 12-patient screening list might make you disengage or get sloppy.", manage: "You shine brightest in the highest-acuity rooms (like complex ERCPs or emergency add-ons)." },
+        "ESFP": { icon: "fa-face-smile-beam", title: "The Room Lightener (Explorer)", super: "Banter and distraction. You know exactly how to chat with an awake patient to distract them from an uncomfortable scope, keeping energy positive.", blind: "You can get distracted by the social aspect of the job and might need reminders to finish charting or restock cupboards.", manage: "You are incredible for complex awake-patient cases. You keep unit morale up naturally." },
+        "INFJ": { icon: "fa-brain", title: "The Quiet Insight (Diplomat)", super: "Anticipation. You read the room instantly and can anticipate exactly what instrument the doctor needs before anyone says a word.", blind: "You absorb the unit's stress like a sponge and are highly prone to sudden, silent burnout.", manage: "Protect your energy by stepping away from highly toxic or chaotic environments when possible." },
+        "INFP": { icon: "fa-handshake-angle", title: "The Empathetic Listener (Diplomat)", super: "Deep emotional connection. You are the ultimate safe space for vulnerable patients in the recovery bay who are waking up confused or scared.", blind: "You struggle deeply in aggressively fast-paced environments or when forced to rush patient care for the sake of 'turnover times.'", manage: "The recovery bay and admissions are your havens. Your empathy is a massive asset to patient experience." },
+        "ENFJ": { icon: "fa-chalkboard-user", title: "The Natural Mentor (Diplomat)", super: "Coaching and unity. You naturally step into the role of training new staff, smoothing over conflicts, and making sure everyone feels included.", blind: "You overcommit. You will say 'yes' to staying late, taking on extra projects, and covering shifts until you crash.", manage: "You are an amazing preceptor, but you must aggressively guard your own workload and go home on time!" },
+        "ENFP": { icon: "fa-lightbulb", title: "The Idea Generator (Diplomat)", super: "Enthusiasm and adaptability. You are highly flexible and are always finding creative new ways to improve the patient experience or lighten the mood.", blind: "You strongly dislike the repetitive nature of tasks like scope reprocessing and might struggle with rigid rules.", manage: "You are great at spearheading patient-experience initiatives. Variety in your daily assignments keeps you engaged." },
+        "INTJ": { icon: "fa-diagram-project", title: "The Workflow Mastermind (Analyst)", super: "System optimization. You see the inefficiencies in how the unit runs—from the schedule to the prep room—and you know how to fix it.", blind: "You prioritize logic over feelings, which means you can sometimes dismiss a colleague's emotional venting as irrelevant.", manage: "You are perfect for Quality Improvement projects. Remember to validate your teammates' feelings, not just their logic." },
+        "INTP": { icon: "fa-microscope", title: "The Pathology Nerd (Analyst)", super: "Deep knowledge. You love understanding the 'why.' You want to know the mechanism of a new sedation drug or the pathology behind a lesion.", blind: "You can get so lost in the technical details of a case that you miss the social or emotional cues of the patient.", manage: "You are the go-to person for researching new protocols or presenting findings on new endoscopy tech." },
+        "ENTJ": { icon: "fa-chess-king", title: "The Crisis Director (Analyst)", super: "Decisive leadership. In a chaotic situation, you will immediately take absolute charge, delegate tasks clearly, and bring order to a crashing room.", blind: "You can be intimidating. Your intense focus on the end goal can sometimes run over the feelings of quieter staff members.", manage: "You excel during heavy, difficult lists. Just remember to use 'we' instead of 'I' when directing the team." },
+        "ENTP": { icon: "fa-atom", title: "The Innovator (Analyst)", super: "Forward-Thinking. You are not afraid to challenge outdated rules or question why a practice is used if there is a better, more efficient way.", blind: "You love brainstorming and challenging the norm so much that it can sometimes cause friction with 'by-the-book' nurses or doctors who prefer established routines.", manage: "Channel your innovative energy into updating unit policies, auditing workflows, and finding evidence-based practice improvements." }
+    };
+
+    let currentQuestion = 0;
+    let userChoices = []; // Now tracks history so the Back button can easily recalculate scores
+
+    function startQuiz() {
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('question-screen').style.display = 'block';
+        document.getElementById('question-screen').classList.add('animate-fade-in');
+        userChoices = [];
+        currentQuestion = 0;
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const q = questions[currentQuestion];
+        
+        // Update Progress Bar
+        const progressPercentage = (currentQuestion / questions.length) * 100;
+        document.getElementById('progress-fill').style.width = progressPercentage + '%';
+        document.getElementById('progress-text').innerText = `Question ${currentQuestion + 1} of ${questions.length}`;
+        
+        // Show/Hide Back Button
+        document.getElementById('back-btn').style.display = currentQuestion > 0 ? 'block' : 'none';
+
+        // Trigger reflow for slide animation
+        const animator = document.getElementById('question-animator');
+        animator.classList.remove('animate-fade-in');
+        void animator.offsetWidth; // trigger reflow
+        animator.classList.add('animate-fade-in');
+
+        document.getElementById('question-text').innerText = q.text;
+        document.getElementById('option-a').innerText = q.options[0].text;
+        document.getElementById('option-b').innerText = q.options[1].text;
+        
+        // Reset scroll position
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function goBack() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            loadQuestion();
+        }
+    }
+
+    function selectAnswer(optionIndex) {
+        let selectedValue = questions[currentQuestion].options[optionIndex].value;
+        userChoices[currentQuestion] = selectedValue; // Store specific choice at this step
+        
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+            setTimeout(loadQuestion, 150); // slight delay makes the button click feel more responsive before changing
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('question-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Tally up the final scores based on history
+        let scores = { I:0, E:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+        userChoices.forEach(choice => scores[choice]++);
+
+        // Calculate final 4 letters
+        let type = "";
+        type += (scores.E > scores.I) ? "E" : "I"; 
+        type += (scores.N > scores.S) ? "N" : "S"; 
+        type += (scores.F > scores.T) ? "F" : "T"; 
+        type += (scores.P > scores.J) ? "P" : "J"; 
+
+        const resultProfile = profiles[type];
+
+        // Update the Icon
+        const iconElement = document.getElementById('type-icon');
+        iconElement.className = 'type-icon fas ' + resultProfile.icon; // Reset and add new icon
+
+        document.getElementById('type-letters').innerText = type;
+        document.getElementById('type-title').innerText = resultProfile.title;
+        document.getElementById('type-superpower').innerText = resultProfile.super;
+        document.getElementById('type-blindspot').innerText = resultProfile.blind;
+        document.getElementById('type-management').innerText = resultProfile.manage;
+
+        // Trigger Confetti Celebration!
+        confetti({
+            particleCount: 150,
+            spread: 80,
+            origin: { y: 0.6 },
+            colors: ['#3182ce', '#2b6cb0', '#e3f2fd', '#e53e3e', '#38a169']
+        });
+    }
+</script>
+</body>
+</html>
